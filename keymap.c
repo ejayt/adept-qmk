@@ -27,7 +27,8 @@ enum custom_keycodes {
 // -----------------------------------------------------------------------------
 
 enum tapdance {
-    MCLK = 0,
+    TLTD = 0,
+    MCLK,
     RCLK,
     LTAB,
     RTAB,
@@ -95,6 +96,7 @@ typedef struct {
     td_state_t state;
 } td_tap_t;
 
+static td_tap_t tl_tap_state   = { .is_press_action = true, .state = TD_NONE };
 static td_tap_t mclk_tap_state = { .is_press_action = true, .state = TD_NONE };
 static td_tap_t rclk_tap_state = { .is_press_action = true, .state = TD_NONE };
 static td_tap_t ltb_tap_state  = { .is_press_action = true, .state = TD_NONE };
@@ -277,6 +279,30 @@ report_mouse_t pointing_device_task_user(report_mouse_t mouse_report) {
 // -----------------------------------------------------------------------------
 // Tap dance callbacks
 // -----------------------------------------------------------------------------
+void tl_finished(tap_dance_state_t *state, void *user_data) {
+    tl_tap_state.state = cur_dance(state);
+    
+    switch(tl_tap_state.state) {
+        case TD_SINGLE_TAP:
+            if (is_mac_mode()) {
+                tap_code16(C(KC_UP));
+            } else {
+                tap_code16(C(A(KC_TAB)));
+            }
+            break;
+        
+        case TD_TRIPLE_TAP:
+            layer_on(_LOCK);
+            break;
+        
+        default:
+            break;
+    }
+}
+
+void tl_reset(tap_dance_state_t *state, void *user_data) {
+    tl_tap_state.state = TD_NONE;
+}
 
 void mclk_finished(tap_dance_state_t *state, void *user_data) {
     mclk_tap_state.state = cur_dance(state);
@@ -317,7 +343,6 @@ void rclk_finished(tap_dance_state_t *state, void *user_data) {
             send_close_tab();
             break;
         case TD_TRIPLE_TAP:
-            layer_on(_LOCK);
             set_ball_mode(BALL_MODE_SCROLL);
             break;
         default:
@@ -442,6 +467,7 @@ void volu_reset(tap_dance_state_t *state, void *user_data) {
 // -----------------------------------------------------------------------------
 
 tap_dance_action_t tap_dance_actions[] = {
+    [TLTD] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, tl_finished, tl_reset)
     [MCLK] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, mclk_finished, mclk_reset),
     [RCLK] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, rclk_finished, rclk_reset),
     [LTAB] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, ltb_finished, ltb_reset),
@@ -455,7 +481,7 @@ tap_dance_action_t tap_dance_actions[] = {
 // Combos
 // -----------------------------------------------------------------------------
 
-const uint16_t PROGMEM reset_combo[] = {C(A(KC_TAB)), TD(RCLK), COMBO_END};
+const uint16_t PROGMEM reset_combo[] = {TD(TLTD), TD(RCLK), COMBO_END};
 const uint16_t PROGMEM esc_combo[]   = {TD(LTAB), TD(RTAB), COMBO_END};
 const uint16_t PROGMEM scr_combo[]   = {TD(VOLU), TD(RCLK), COMBO_END};
 
@@ -490,22 +516,22 @@ void process_combo_event(uint16_t combo_index, bool pressed) {
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [_BASE] = LAYOUT(
-        C(A(KC_TAB)), DPI_CONFIG, TD(MCLK), TD(RCLK),
-        MS_BTN1,                  TD(VOLU)
+        TD(TLTD), DPI_CONFIG, TD(MCLK), TD(RCLK),
+        MS_BTN1,                        TD(VOLU)
     ),
 
     [_VOL] = LAYOUT(
         _______, _______, S(KC_COMM), S(KC_DOT),
-        _______,          _______
+        _______,                      _______
     ),
 
     [_LOCK] = LAYOUT(
-        DF_MAC, OFF, OFF, OFF,
-        OFF,    DF_WIN
+        OFF, DF_WIN, DF_MAC, OFF,
+        OFF,                 OFF 
     ),
 
     [_MAC] = LAYOUT(
-        C(KC_UP), DPI_CONFIG, TD(MCLK), TD(RCLK),
+        TD(TLTD), DPI_CONFIG, TD(MCLK), TD(RCLK),
         MS_BTN1,  TD(VOLU)
     ),
 };
