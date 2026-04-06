@@ -1,208 +1,133 @@
-# Ploopy Adept – Custom QMK Keymap (ejay)
+# 🖲️ Ploopy Adept -- Custom QMK Keymap
 
-## Overview
+Custom firmware for the **Ploopy Adept trackball** with:
 
-This is a custom QMK keymap for the **Ploopy Adept trackball**, designed as a hybrid:
+-   Windows / macOS dual-mode (persistent)
+-   Tap dance actions
+-   Scroll, zoom, and volume ball modes
+-   Sticky scroll
+-   Combo-based OS switching
 
-* 🖱️ High-control pointing device
-* ⌨️ Macro pad for browser + system control
-* 🔁 Dual OS support (Windows + macOS)
-* 🎯 Mode-based trackball behavior (scroll, zoom, volume, arrows)
+------------------------------------------------------------------------
 
-The layout is optimized for **single-hand use with minimal finger travel**.
+## 🧠 Architecture Overview
 
----
+### Layers
 
-## Button Layout
+  Layer     Name      Purpose
+  --------- --------- -----------------------------------
+  `_BASE`   Windows   Default Windows behavior
+  `_MAC`    macOS     Default macOS behavior
+  `_VOL`    Volume    Temporary layer for alt functions
 
-```
-LAYOUT(
-  top_left, middle_left, middle_right, top_right,
-  bottom_left,                      bottom_right
-)
-```
+------------------------------------------------------------------------
 
-| Position     | Button |
-| ------------ | ------ |
-| Top Left     | TL     |
-| Middle Left  | ML     |
-| Middle Right | MR     |
-| Top Right    | TR     |
-| Bottom Left  | BL     |
-| Bottom Right | BR     |
+## 🔁 OS Switching
 
----
+### Toggle OS (Combo)
 
-## Base Behavior (Windows Default)
+-   **DPI_CONFIG + Middle Click**
+-   Toggles between Windows and macOS
 
-### TL – Task Switcher
+### Reset (Combo)
 
-* Tap: `Ctrl + Alt + Tab` (persistent switcher)
+-   **DPI_CONFIG + Middle Click + Right Click**
+-   Resets keyboard
 
-### ML – DPI
+------------------------------------------------------------------------
 
-* Tap: Cycle DPI
+## 🖱️ Ball Modes
 
-### MR – Middle Click / Zoom / Reopen Tab
+-   Pointer: normal cursor movement\
+-   Scroll: converts movement to scrolling\
+-   Zoom: scroll + Ctrl (Windows) / Cmd (macOS)\
+-   Volume: vertical movement controls volume
 
-* Tap: Middle click
-* Hold: **Zoom mode** (ball = zoom in/out)
-* Double Tap: Reopen tab (`Ctrl + Shift + T`)
+------------------------------------------------------------------------
 
----
+## 📌 Sticky Scroll
 
-### TR – Right Click / Scroll / Close Tab
+-   Activated by **Right Click triple tap**
+-   Cancels on **any key press**
 
-* Tap: Right click
-* Hold: **Scroll mode** (drag scroll)
-* Double Tap: Close tab (`Ctrl + W`)
-* Triple Tap: Enter **Lock Layer** (persistent scroll)
+------------------------------------------------------------------------
 
----
+## 🎛️ Button Layout
 
-### BL – Left Click
+    LAYOUT(
+      top_left, middle_left, middle_right, top_right,
+      bottom_left, bottom_right
+    )
 
-* Standard left click
+------------------------------------------------------------------------
 
----
+## 🎮 Button Behavior
 
-### BR – Escape / Volume Mode
+### Top Left
 
-* Tap: `Esc`
-* Hold: **Volume mode** (ball = volume up/down)
+-   Windows: Ctrl + Alt + Tab\
+-   macOS: Mission Control (Ctrl + ↑)
 
----
+### Middle Left
 
-## macOS Behavior
+-   DPI Config
 
-Switching to macOS mode updates all relevant shortcuts:
+### Middle Right (Tap Dance)
 
-| Action        | Windows      | macOS       |
-| ------------- | ------------ | ----------- |
-| Close tab     | Ctrl+W       | Cmd+W       |
-| Reopen tab    | Ctrl+Shift+T | Cmd+Shift+T |
-| Copy          | Ctrl+C       | Cmd+C       |
-| Paste         | Ctrl+V       | Cmd+V       |
-| Zoom modifier | Ctrl         | Cmd         |
+-   Tap: Middle Click\
+-   Hold: Scroll Mode\
+-   Double Tap: Reopen Tab
 
-### TL (Mac Only)
+### Top Right (Tap Dance)
 
-* Tap: **Mission Control** (`Ctrl + ↑`)
+-   Tap: Right Click\
+-   Hold: Zoom Mode\
+-   Double Tap: Close Tab\
+-   Triple Tap: Sticky Scroll
 
----
+### Bottom Left
 
-## Modes (Trackball Behavior)
+-   Left Click
 
-| Mode    | Activated By       | Behavior                           |
-| ------- | ------------------ | ---------------------------------- |
-| Pointer | Default            | Normal mouse movement              |
-| Scroll  | TR Hold            | Ball scrolls (vertical/horizontal) |
-| Zoom    | MR Hold            | Ball zooms (Ctrl/Cmd + scroll)     |
-| Volume  | BR Hold            | Ball controls system volume        |
-| Arrows  | (Unused currently) | Ball sends arrow keys              |
+### Bottom Right (Tap Dance)
 
----
+-   Tap: Escape\
+-   Hold: Volume Mode
 
-## Lock Layer
+------------------------------------------------------------------------
 
-Activated via:
+## 🔊 Volume Layer
 
-* TR triple tap
-* OR combo (see below)
+-   `<` and `>` keys available while held
 
-### Behavior:
+------------------------------------------------------------------------
 
-* Locks scroll mode
-* Allows OS switching
+## ⚙️ CPI / DPI
 
-| Button | Action                 |
-| ------ | ---------------------- |
-| TL     | Switch to macOS mode   |
-| BR     | Switch to Windows mode |
-| Others | Exit lock mode         |
+-   Default: 400\
+-   Zoom: 50 (precision)
 
----
+------------------------------------------------------------------------
 
-## Combos
+## 🧩 Combos
 
-| Combo                          | Action           |
-| ------------------------------ | ---------------- |
-| TL + TR (AltTab + Right Click) | Reset keyboard   |
-| ML + MR                        | Escape           |
-| BR + TR                        | Enter Lock Layer |
+  Combo               Action
+  ------------------- -----------
+  DPI + MCLK          Toggle OS
+  DPI + MCLK + RCLK   Reset
 
----
+------------------------------------------------------------------------
 
-## OS Switching
+## 🧪 Smart Behavior
 
-The device maintains a **persistent default layer**:
+-   OS-aware shortcuts (Ctrl vs Cmd automatically)
+-   Sticky scroll auto-disables on input
+-   Mode switching resets accumulators
 
-* `DF_MAC` → macOS mode
-* `DF_WIN` → Windows mode
+------------------------------------------------------------------------
 
-This avoids relying on OS-level modifier remapping.
+## 🛠️ Notes
 
----
-
-## Design Philosophy
-
-This layout follows a few key principles:
-
-### 1. Mode-based control
-
-Instead of more buttons, the ball changes behavior:
-
-* Move → Scroll → Zoom → Volume
-
-### 2. Tap vs Hold vs Multi-tap
-
-Each button has layered intent:
-
-* Tap = primary action
-* Hold = mode shift
-* Double tap = secondary action
-* Triple tap = system-level behavior
-
-### 3. OS-native behavior
-
-No reliance on OS remapping:
-
-* All differences handled in firmware
-* Fully portable across machines
-
-### 4. Minimal cognitive load
-
-* Same physical actions across OS
-* Only modifier differences change
-
----
-
-## Build & Flash
-
-### Compile
-
-```bash
-qmk compile -kb ploopyco/madromys/rev1_001 -km ejay
-```
-
-### Flash
-
-1. Put Adept into bootloader mode
-2. Drag `.uf2` file onto device
-
----
-
-## Notes / Future Improvements
-
-* `COPYTXT` macro still uses Ctrl (needs macOS-aware version)
-* Possible split of `_LOCK` into:
-
-  * OS selection layer
-  * scroll lock layer
-* Potential OS auto-detection (not currently used)
-
----
-
-## Author
-
-Ejay – DevOps engineer, trackball enjoyer, and chaos-driven input designer 😄
+-   Default layer persists across reboots
+-   No lock layer (simpler + safer)
+-   Tap dance maximizes functionality with minimal buttons
